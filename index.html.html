@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaAI — Intelligent Fish Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════
+   AQUAAI DESIGN SYSTEM v3.0
+   Theme: Deep-ocean bioluminescence meets precision HUD
+   Fonts: Syne (display) + JetBrains Mono (data/code)
+   ════════════════════════════════════════════════════ */
+:root {
+  --ocean-900: #010a12;
+  --ocean-850: #030f1d;
+  --ocean-800: #051526;
+  --ocean-750: #071c31;
+  --ocean-700: #0a2440;
+  --ocean-600: #0d3055;
+  --ocean-500: #114069;
+
+  --bio-cyan:   #00d4e8;
+  --bio-teal:   #00b4cc;
+  --bio-blue:   #1a7fff;
+  --bio-green:  #00e87a;
+  --bio-amber:  #f5a623;
+  --bio-red:    #ff3355;
+
+  --state-normal:   #00e87a;
+  --state-warning:  #f5a623;
+  --state-critical: #ff3355;
+
+  --glow-cyan:  0 0 24px rgba(0,212,232,0.35), 0 0 48px rgba(0,212,232,0.12);
+  --glow-green: 0 0 24px rgba(0,232,122,0.4),  0 0 48px rgba(0,232,122,0.12);
+  --glow-amber: 0 0 24px rgba(245,166,35,0.4), 0 0 48px rgba(245,166,35,0.12);
+  --glow-red:   0 0 24px rgba(255,51,85,0.5),  0 0 48px rgba(255,51,85,0.15);
+
+  --surface-1: rgba(5,21,38,0.97);
+  --surface-2: rgba(7,28,49,0.92);
+  --surface-3: rgba(10,36,64,0.88);
+
+  --border-subtle: rgba(0,180,204,0.07);
+  --border-normal: rgba(0,180,204,0.14);
+  --border-accent: rgba(0,180,204,0.3);
+
+  --txt-bright: #e4f5ff;
+  --txt-medium: #8ab4cc;
+  --txt-muted:  #3d6880;
+  --txt-ghost:  #1e3d55;
+
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  background: var(--ocean-900);
+  color: var(--txt-bright);
+  font-family: var(--font-display);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 15% 5%, rgba(0,80,120,0.2) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 85% 85%, rgba(0,30,90,0.18) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+/* Fine scanline */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none; z-index: 9998;
+}
+
+/* ── Layout ── */
+.app-wrapper { max-width: 1520px; margin: 0 auto; padding: 20px 24px 28px; position: relative; z-index: 1; }
+
+/* ════════════════ ENTRANCE ANIMATIONS ════════════════ */
+.app-wrapper > * { animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) both; }
+header      { animation-delay: 0.05s; }
+.main-grid  { animation-delay: 0.12s; }
+.bottom-row { animation-delay: 0.22s; }
+footer      { animation-delay: 0.32s; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════ HEADER ════════════════ */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 28px; margin-bottom: 22px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(20px);
+  position: relative; overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0,212,232,0.14) inset, 0 24px 60px rgba(0,0,0,0.45);
+}
+/* animated top beam */
+header::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,232,0.7) 40%, rgba(0,136,255,0.9) 55%, rgba(0,212,232,0.7) 70%, transparent);
+  animation: headerBeam 5s ease-in-out infinite;
+}
+@keyframes headerBeam { 0% { left:-100%; } 100% { left:100%; } }
+/* faint grid texture */
+header::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,180,204,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,180,204,0.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+
+.logo { display: flex; align-items: center; gap: 16px; z-index: 1; }
+.logo-icon-wrap {
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(0,180,204,0.22), rgba(0,100,180,0.14));
+  border: 1px solid rgba(0,212,232,0.32);
+  border-radius: var(--r-md);
+  box-shadow: var(--glow-cyan);
+  animation: logoBreath 5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes logoBreath {
+  0%,100% { box-shadow: var(--glow-cyan); }
+  50%      { box-shadow: 0 0 32px rgba(0,212,232,0.55), 0 0 64px rgba(0,212,232,0.2); }
+}
+.logo-icon { font-size: 26px; display: block; animation: float 3.5s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+.logo-text-group { display: flex; flex-direction: column; gap: 2px; }
+.logo-text {
+  font-size: 1.85rem; font-weight: 800; letter-spacing: 3px;
+  font-family: var(--font-display);
+  background: linear-gradient(90deg, var(--bio-cyan), #70ccff 50%, var(--bio-blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.logo-sub {
+  font-size: 0.6rem; color: var(--txt-muted);
+  letter-spacing: 4px; font-family: var(--font-mono); text-transform: uppercase;
+}
+
+.header-right { display: flex; align-items: center; gap: 18px; z-index: 1; }
+.ai-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 18px; border-radius: 100px;
+  background: linear-gradient(90deg, rgba(0,212,232,0.1), rgba(0,100,180,0.07));
+  border: 1px solid rgba(0,212,232,0.28);
+  font-family: var(--font-mono); font-size: 0.67rem;
+  color: var(--bio-cyan); font-weight: 500; letter-spacing: 1.5px;
+}
+.ai-pulse {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bio-cyan); box-shadow: 0 0 8px var(--bio-cyan);
+  animation: pulse 1.3s ease-in-out infinite; flex-shrink: 0;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); box-shadow: 0 0 8px var(--bio-cyan); }
+  50%      { opacity:0.25; transform:scale(0.55); box-shadow:none; }
+}
+#processingIndicator {
+  font-family: var(--font-mono); font-size: 0.64rem;
+  color: var(--bio-blue); min-width: 160px; text-align: right; letter-spacing: 1px;
+}
+.clock-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.clock {
+  font-family: var(--font-mono); font-size: 1.15rem;
+  color: var(--bio-cyan); letter-spacing: 3px; font-weight: 500;
+  text-shadow: 0 0 14px rgba(0,212,232,0.45);
+}
+.clock-label { font-family: var(--font-mono); font-size: 0.5rem; color: var(--txt-muted); letter-spacing: 3px; text-transform: uppercase; }
+
+/* ════════════════ MAIN GRID ════════════════ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+}
+
+/* ════════════════ SHARED PANEL ════════════════ */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.38), 0 1px 0 rgba(255,255,255,0.025) inset;
+  transition: box-shadow 0.4s ease;
+}
+.panel:hover { box-shadow: 0 12px 44px rgba(0,0,0,0.48), 0 0 0 1px rgba(0,212,232,0.07); }
+
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0,0,0,0.22);
+  position: relative;
+}
+.panel-header::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,180,204,0.25), transparent);
+}
+.panel-title {
+  font-size: 0.64rem; font-weight: 600; letter-spacing: 3.5px;
+  text-transform: uppercase; color: var(--bio-cyan);
+  font-family: var(--font-mono);
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-body { padding: 18px; }
+
+/* ════════════════ AQUARIUM ════════════════ */
+.aquarium-wrap { grid-column: 1; grid-row: 1 / 3; }
+.aquarium-wrap .panel {
+  border-color: rgba(0,180,204,0.18);
+  display: flex; flex-direction: column;
+}
+
+#aquariumCanvas {
+  display: block; width: 100%;
+  background: linear-gradient(180deg, #010810 0%, #030f1e 55%, #040e1c 100%);
+  flex: 1;
+}
+.aquarium-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 20px;
+  background: rgba(0,0,0,0.42);
+  border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-mono); font-size: 0.63rem; color: var(--txt-muted); letter-spacing: 1px;
+}
+#fishBehaviorTag {
+  padding: 4px 14px; border-radius: 100px;
+  background: rgba(0,212,232,0.07); border: 1px solid rgba(0,212,232,0.22);
+  color: var(--bio-cyan); font-size: 0.62rem;
+  font-family: var(--font-mono); letter-spacing: 1px;
+  transition: all 0.5s ease;
+}
+#fishCountTag { font-family: var(--font-mono); font-size: 0.63rem; color: var(--txt-muted); letter-spacing: 1px; }
+
+/* ════════════════ RIGHT COLUMN ════════════════ */
+.right-col { display: flex; flex-direction: column; gap: 18px; }
+
+/* ════════════════ STATUS CARD ════════════════ */
+.status-card {
+  padding: 22px 24px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-normal);
+  background: var(--surface-1);
+  backdrop-filter: blur(16px);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease, background 0.5s ease;
+  position: relative; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.38);
+}
+/* state-color top accent bar */
+.status-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--state-normal);
+  transition: background 0.5s ease;
+}
+.status-card.critical::before { background: var(--state-critical); }
+.status-card.warning::before  { background: var(--state-warning); }
+.status-card.normal::before   { background: var(--state-normal); }
+
+.status-card.critical {
+  border-color: rgba(255,51,85,0.4);
+  box-shadow: var(--glow-red), 0 8px 32px rgba(0,0,0,0.4);
+  background: linear-gradient(140deg, rgba(255,51,85,0.06), var(--surface-1) 55%);
+  animation: critPulse 2.2s ease-in-out infinite;
+}
+.status-card.warning {
+  border-color: rgba(245,166,35,0.38);
+  box-shadow: var(--glow-amber), 0 8px 32px rgba(0,0,0,0.4);
+  background: linear-gradient(140deg, rgba(245,166,35,0.05), var(--surface-1) 55%);
+}
+.status-card.normal {
+  border-color: rgba(0,232,122,0.28);
+  box-shadow: var(--glow-green), 0 8px 32px rgba(0,0,0,0.4);
+  background: linear-gradient(140deg, rgba(0,232,122,0.04), var(--surface-1) 55%);
+}
+@keyframes critPulse {
+  0%,100% { box-shadow: var(--glow-red), 0 8px 32px rgba(0,0,0,0.4); }
+  50%      { box-shadow: 0 0 36px rgba(255,51,85,0.7), 0 0 72px rgba(255,51,85,0.22), 0 8px 32px rgba(0,0,0,0.4); }
+}
+
+.status-label { font-size: 0.58rem; letter-spacing: 4px; text-transform: uppercase; color: var(--txt-muted); font-family: var(--font-mono); margin-bottom: 8px; }
+#statusText {
+  font-size: 2.3rem; font-weight: 800; letter-spacing: 3px;
+  font-family: var(--font-display); transition: color 0.5s ease; line-height: 1;
+}
+
+.status-meta {
+  display: flex; gap: 0; margin-top: 16px;
+  border-top: 1px solid var(--border-subtle); padding-top: 14px;
+}
+.meta-item { display: flex; flex-direction: column; gap: 3px; flex: 1; padding-right: 14px; }
+.meta-item:not(:last-child) { border-right: 1px solid var(--border-subtle); margin-right: 14px; }
+.meta-key { font-size: 0.53rem; color: var(--txt-muted); letter-spacing: 2px; text-transform: uppercase; font-family: var(--font-mono); }
+.meta-val { font-size: 1.05rem; font-weight: 700; font-family: var(--font-mono); letter-spacing: 0.5px; }
+#anomalyScore   { color: var(--bio-cyan); }
+#confidenceScore { color: var(--bio-green); }
+#uptimeDisplay  { color: var(--txt-medium); }
+
+/* ════════════════ SENSOR GRID ════════════════ */
+.sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.sensor-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 16px 15px 13px;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease, background 0.4s ease;
+  position: relative; overflow: hidden; cursor: default;
+}
+.sensor-card:hover { transform: translateY(-2px); border-color: var(--border-normal); }
+
+/* colored left accent stripe */
+.sensor-card::before {
+  content: '';
+  position: absolute; left: 0; top: 10%; bottom: 10%; width: 3px;
+  background: var(--bar-color, var(--bio-cyan));
+  border-radius: 0 3px 3px 0;
+  opacity: 0.6; transition: opacity 0.4s;
+}
+.sensor-card:hover::before { opacity: 1; }
+
+.sensor-card.alert {
+  border-color: rgba(255,51,85,0.45) !important;
+  box-shadow: var(--glow-red);
+  background: linear-gradient(135deg, rgba(255,51,85,0.07), var(--surface-2) 65%);
+}
+.sensor-card.warn {
+  border-color: rgba(245,166,35,0.4) !important;
+  box-shadow: var(--glow-amber);
+  background: linear-gradient(135deg, rgba(245,166,35,0.06), var(--surface-2) 65%);
+}
+
+.sensor-icon { font-size: 1.25rem; margin-bottom: 7px; display: block; }
+.sensor-name { font-size: 0.53rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--txt-muted); font-family: var(--font-mono); margin-bottom: 3px; }
+.sensor-value {
+  font-size: 1.72rem; font-weight: 700; font-family: var(--font-mono);
+  color: var(--bio-cyan); transition: color 0.4s ease;
+  line-height: 1; letter-spacing: -0.5px;
+}
+.sensor-unit { font-size: 0.58rem; color: var(--txt-muted); font-family: var(--font-mono); letter-spacing: 1px; margin-bottom: 7px; display: block; }
+.sensor-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 10px; border-radius: 100px; font-size: 0.53rem;
+  font-family: var(--font-mono); font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  background: rgba(0,232,122,0.1); color: var(--bio-green); border: 1px solid rgba(0,232,122,0.25);
+  transition: all 0.4s ease; margin-bottom: 8px;
+}
+
+/* ── Gauge bars ── */
+.gauge-row { margin-top: 4px; }
+.gauge-track { height: 3px; background: rgba(255,255,255,0.04); border-radius: 100px; overflow: hidden; }
+.gauge-fill {
+  height: 100%; border-radius: 100px;
+  transition: width 0.85s cubic-bezier(0.4,0,0.2,1), background 0.4s ease;
+}
+
+/* ════════════════ CONTROL BUTTONS ════════════════ */
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.btn {
+  padding: 10px 12px; border-radius: var(--r-sm); cursor: pointer;
+  font-family: var(--font-mono); font-size: 0.63rem; font-weight: 700;
+  border: 1px solid; transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
+  pointer-events: none;
+}
+.btn-primary { background: rgba(26,127,255,0.12); border-color: rgba(26,127,255,0.42); color: #68b4ff; }
+.btn-primary:hover { background: rgba(26,127,255,0.24); box-shadow: 0 0 18px rgba(26,127,255,0.28); transform: translateY(-1px); color: #90c8ff; }
+.btn-danger  { background: rgba(255,51,85,0.1);  border-color: rgba(255,51,85,0.38);  color: #ff8099; }
+.btn-danger:hover  { background: rgba(255,51,85,0.22); box-shadow: 0 0 18px rgba(255,51,85,0.22); transform: translateY(-1px); }
+.btn-success { background: rgba(0,232,122,0.1); border-color: rgba(0,232,122,0.33); color: #45ea90; }
+.btn-success:hover { background: rgba(0,232,122,0.22); box-shadow: 0 0 18px rgba(0,232,122,0.22); transform: translateY(-1px); }
+.btn-neutral { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.09); color: var(--txt-muted); }
+.btn-neutral:hover { border-color: rgba(0,212,232,0.32); color: var(--bio-cyan); background: rgba(0,212,232,0.06); transform: translateY(-1px); }
+.btn:active  { transform: translateY(0) scale(0.97) !important; }
+
+/* ════════════════ ALERT BOX ════════════════ */
+#alertBox {
+  background: var(--surface-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 0.67rem;
+  color: var(--txt-medium); line-height: 1.75;
+  min-height: 70px; transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+  position: relative; overflow: hidden;
+}
+/* state left stripe */
+#alertBox::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--bio-green); transition: background 0.5s ease;
+  border-radius: 0 2px 2px 0;
+}
+#alertBox.active {
+  border-color: rgba(255,51,85,0.5);
+  box-shadow: var(--glow-red);
+  color: #ff8099;
+  background: linear-gradient(135deg, rgba(255,51,85,0.08), var(--surface-3) 65%);
+  animation: alertBlink 0.9s ease-in-out 4;
+}
+#alertBox.active::before { background: var(--bio-red); }
+@keyframes alertBlink { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+
+#alertBox.warn-active {
+  border-color: rgba(245,166,35,0.5);
+  box-shadow: var(--glow-amber);
+  color: #ffc060;
+  background: linear-gradient(135deg, rgba(245,166,35,0.07), var(--surface-3) 65%);
+}
+#alertBox.warn-active::before { background: var(--bio-amber); }
+
+.alert-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: var(--bio-red); font-size: 0.62rem; font-weight: 700; letter-spacing: 2px; }
+.alert-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 7px currentColor; animation: pulse 0.7s infinite; }
+
+/* ════════════════ EMAIL SIM ════════════════ */
+.email-label {
+  font-size: 0.54rem; letter-spacing: 3px; color: var(--txt-muted);
+  font-family: var(--font-mono); margin: 12px 0 6px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.email-label::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+
+#emailSimBox {
+  background: rgba(0,212,232,0.03); border: 1px solid rgba(0,212,232,0.1);
+  border-radius: var(--r-sm); padding: 10px 14px;
+  font-family: var(--font-mono); font-size: 0.61rem;
+  color: var(--txt-muted); min-height: 52px; line-height: 1.85;
+  transition: all 0.5s ease;
+}
+#emailSimBox.sent { border-color: rgba(0,232,122,0.3); color: #50d080; background: rgba(0,232,122,0.04); }
+.email-to { color: var(--bio-blue); }
+
+/* ════════════════ EVENT LOG ════════════════ */
+#eventLog {
+  list-style: none; font-family: var(--font-mono); font-size: 0.61rem;
+  max-height: 186px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--ocean-600) transparent;
+}
+#eventLog::-webkit-scrollbar { width: 3px; }
+#eventLog::-webkit-scrollbar-thumb { background: var(--ocean-600); border-radius: 2px; }
+#eventLog li {
+  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.025);
+  display: flex; gap: 12px; align-items: flex-start;
+  animation: logSlide 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+#eventLog li:last-child { border-bottom: none; }
+@keyframes logSlide { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+.log-time { color: var(--txt-ghost); flex-shrink: 0; margin-top: 1px; }
+.log-msg.critical { color: #ff7090; }
+.log-msg.warning  { color: var(--bio-amber); }
+.log-msg.normal   { color: #40d880; }
+.log-msg.info     { color: var(--bio-cyan); }
+
+/* ════════════════ BOTTOM ROW ════════════════ */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+
+/* ════════════════ HISTORY CHART ════════════════ */
+#historyChart { width: 100%; height: 96px; display: block; }
+.chart-meta {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 0.52rem; color: var(--txt-ghost);
+  letter-spacing: 1px; margin-top: 5px; padding: 0 6px;
+}
+
+/* ════════════════ TAG PILLS ════════════════ */
+#alertCount {
+  font-family: var(--font-mono); font-size: 0.59rem; color: var(--txt-muted); letter-spacing: 1px;
+  background: var(--surface-3); border: 1px solid var(--border-subtle);
+  padding: 3px 11px; border-radius: 100px;
+}
+#logCount { font-family: var(--font-mono); font-size: 0.59rem; color: var(--txt-muted); letter-spacing: 1px; }
+#frameCounter { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 1px; }
+
+/* ════════════════ FOOTER ════════════════ */
+footer {
+  text-align: center; padding: 18px 12px 10px;
+  font-family: var(--font-mono); font-size: 0.56rem; color: var(--txt-ghost);
+  margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ════════════════ RESPONSIVE ════════════════ */
+@media (max-width: 1100px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .aquarium-wrap { grid-row: auto; }
+  .bottom-row { grid-template-columns: 1fr; }
+  .bottom-row .panel[style*="grid-column"] { grid-column: 1 !important; }
+}
+@media (max-width: 620px) {
+  .controls { grid-template-columns: 1fr; }
+  .sensor-grid { grid-template-columns: 1fr; }
+  .header-right { gap: 10px; }
+  .ai-badge span:last-child { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- ══ HEADER ══ -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon-wrap">
+        <span class="logo-icon">🐟</span>
+      </div>
+      <div class="logo-text-group">
+        <div class="logo-text">AquaAI</div>
+        <div class="logo-sub">Intelligent Aquaculture Monitor · v2.1</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="ai-badge"><div class="ai-pulse"></div><span>AI ENGINE ACTIVE</span></div>
+      <div id="processingIndicator">INITIALIZING...</div>
+      <div class="clock-wrap">
+        <div class="clock" id="clockDisplay">00:00:00</div>
+        <div class="clock-label">System Time</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ MAIN GRID ══ -->
+  <div class="main-grid">
+
+    <!-- LEFT: AQUARIUM -->
+    <div class="panel aquarium-wrap">
+      <div class="panel-header">
+        <span class="panel-title">🌊 Live Aquarium Feed</span>
+        <span id="fishCountTag">FISH: 12</span>
+      </div>
+      <canvas id="aquariumCanvas" width="900" height="390"></canvas>
+      <div class="aquarium-footer">
+        <span>TANK ID: AQ-007 &nbsp;|&nbsp; CAPACITY: 500L</span>
+        <span id="fishBehaviorTag">BEHAVIOR: NORMAL</span>
+        <span id="frameCounter" style="color:var(--txt-muted)">FPS: --</span>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- STATUS -->
+      <div class="status-card normal" id="statusCard">
+        <div class="status-label">System Status</div>
+        <div id="statusText" style="color:var(--state-normal)">NORMAL</div>
+        <div class="status-meta">
+          <div class="meta-item">
+            <span class="meta-key">Anomaly Score</span>
+            <span class="meta-val" id="anomalyScore">0.00</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-key">Confidence</span>
+            <span class="meta-val" id="confidenceScore">98%</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-key">Uptime</span>
+            <span class="meta-val" id="uptimeDisplay">00:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SENSORS -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">📡 Sensor Array</span></div>
+        <div class="panel-body">
+          <div class="sensor-grid">
+
+            <div class="sensor-card" id="card-oxygen" style="--bar-color:#00d4e8">
+              <span class="sensor-icon">💧</span>
+              <div class="sensor-name">Dissolved O₂</div>
+              <div class="sensor-value" id="oxygen">6.50</div>
+              <span class="sensor-unit">mg / L</span>
+              <div class="sensor-badge" id="badge-oxygen">OPTIMAL</div>
+              <div class="gauge-row"><div class="gauge-track"><div class="gauge-fill" id="gauge-oxygen" style="width:60%;background:#00d4e8"></div></div></div>
+            </div>
+
+            <div class="sensor-card" id="card-ammonia" style="--bar-color:#f5a623">
+              <span class="sensor-icon">⚗️</span>
+              <div class="sensor-name">Ammonia NH₃</div>
+              <div class="sensor-value" id="ammonia">0.05</div>
+              <span class="sensor-unit">ppm</span>
+              <div class="sensor-badge" id="badge-ammonia">SAFE</div>
+              <div class="gauge-row"><div class="gauge-track"><div class="gauge-fill" id="gauge-ammonia" style="width:25%;background:#00e87a"></div></div></div>
+            </div>
+
+            <div class="sensor-card" id="card-water" style="--bar-color:#1a7fff">
+              <span class="sensor-icon">🌡️</span>
+              <div class="sensor-name">Water Level</div>
+              <div class="sensor-value" id="waterLevel">85</div>
+              <span class="sensor-unit">%</span>
+              <div class="sensor-badge" id="badge-water">STABLE</div>
+              <div class="gauge-row"><div class="gauge-track"><div class="gauge-fill" id="gauge-water" style="width:85%;background:#1a7fff"></div></div></div>
+            </div>
+
+            <div class="sensor-card" id="card-waste" style="--bar-color:#ff3355">
+              <span class="sensor-icon">🧪</span>
+              <div class="sensor-name">Waste Index</div>
+              <div class="sensor-value" id="waste">8</div>
+              <span class="sensor-unit">%</span>
+              <div class="sensor-badge" id="badge-waste">LOW</div>
+              <div class="gauge-row"><div class="gauge-track"><div class="gauge-fill" id="gauge-waste" style="width:8%;background:#00e87a"></div></div></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">⚙️ Control Panel</span></div>
+        <div class="panel-body">
+          <div class="controls">
+            <button class="btn btn-primary" onclick="forceAnomaly('low_oxygen')">⚠ Simulate O₂ Drop</button>
+            <button class="btn btn-danger"  onclick="forceAnomaly('high_ammonia')">☠ Ammonia Spike</button>
+            <button class="btn btn-success" onclick="resetToNormal()">✔ Reset Normal</button>
+            <button class="btn btn-neutral" onclick="togglePause()">⏸ Pause / Resume</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /right-col -->
+  </div><!-- /main-grid -->
+
+  <!-- ══ BOTTOM ROW ══ -->
+  <div class="bottom-row">
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🚨 Alert System</span>
+        <span id="alertCount">ALERTS: 0</span>
+      </div>
+      <div class="panel-body">
+        <div id="alertBox">
+          <span style="color:var(--bio-green)">✓</span>&nbsp; All parameters within safe range. System nominal.
+        </div>
+        <div class="email-label">Email Simulation</div>
+        <div id="emailSimBox">Standby — no alerts to dispatch.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📋 Event Log</span>
+        <span id="logCount">0 entries</span>
+      </div>
+      <div class="panel-body">
+        <ul id="eventLog"></ul>
+      </div>
+    </div>
+
+    <div class="panel" style="grid-column:1/-1;">
+      <div class="panel-header">
+        <span class="panel-title">📈 Oxygen History — Last 60 Seconds</span>
+        <span style="font-family:var(--font-mono);font-size:0.58rem;color:var(--txt-muted)">RANGE: 4.0–8.5 mg/L &nbsp;·&nbsp; CRITICAL THRESHOLD: 5.0</span>
+      </div>
+      <div class="panel-body" style="padding:10px 18px 10px">
+        <canvas id="historyChart"></canvas>
+        <div class="chart-meta"><span>60s ago</span><span>45s</span><span>30s</span><span>15s</span><span>now</span></div>
+      </div>
+    </div>
+
+  </div><!-- /bottom-row -->
+
+  <footer>AquaAI Monitor &nbsp;·&nbsp; Simulated AI System &nbsp;·&nbsp; Academic Demo &nbsp;·&nbsp; All Values Synthetic</footer>
+</div><!-- /app-wrapper -->
+
+<script>
+/* =============================================================
+   AQUAAI FISH MONITORING SYSTEM — COMPLETE SIMULATION ENGINE
+   Author: AquaAI Demo System
+   Version: 2.1
+   Instructions: This entire <script> block is self-contained.
+   It requires the HTML IDs defined above. Compatible with any
+   HTML structure that includes those IDs.
+   =============================================================*/
+
+// ─────────────────────────────────────────────────────────────
+// 1. GLOBAL STATE — single source of truth for all simulation data
+// ─────────────────────────────────────────────────────────────
+const STATE = {
+  // Sensor values (current live values)
+  oxygen:     6.50,
+  ammonia:    0.05,
+  waterLevel: 85.0,
+  waste:      8.0,
+
+  // AI engine outputs
+  anomalyScore:   0.0,
+  confidenceScore: 98,
+  systemStatus:   'NORMAL',   // 'NORMAL' | 'WARNING' | 'CRITICAL'
+
+  // Fish behavior mode
+  behaviorMode: 'NORMAL',     // 'NORMAL' | 'LOW_OXYGEN' | 'HIGH_AMMONIA'
+  fishSpeed:    1.0,
+  clusterFactor: 0.0,
+
+  // Simulation control
+  isPaused:   false,
+  forcedMode: null,           // null | 'low_oxygen' | 'high_ammonia'
+  totalAlerts: 0,
+  startTime:  Date.now(),
+
+  // Drift targets (smooth transition toward)
+  _targetO2:   6.50,
+  _targetNH3:  0.05,
+  _targetWL:   85.0,
+  _targetWaste: 8.0,
+};
+
+// Event log (max 10 entries)
+const EVENT_LOG = [];
+
+// Oxygen history (60 data points)
+const O2_HISTORY = Array(60).fill(6.5);
+
+// ─────────────────────────────────────────────────────────────
+// 2. UTILITY FUNCTIONS
+// ─────────────────────────────────────────────────────────────
+
+/** Clamp a value between min and max */
+function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+
+/** Random float in range [a, b] */
+function rand(a, b) { return a + Math.random() * (b - a); }
+
+/** Smooth lerp — moves current toward target by factor */
+function lerp(current, target, factor) {
+  return current + (target - current) * factor;
+}
+
+/** Get current time string HH:MM:SS */
+function timeStr() {
+  return new Date().toLocaleTimeString('en-GB', { hour12: false });
+}
+
+/** Short time stamp for logs */
+function logTime() {
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 3. SENSOR DATA GENERATION
+//    Generates realistic, smooth, drifting sensor values
+// ─────────────────────────────────────────────────────────────
+function generateSensorData() {
+  if (STATE.isPaused) return;
+
+  // ── Randomly shift drift targets every ~3 seconds (handled by drift timer)
+  // ── Apply smooth lerp toward current target (prevents sudden jumps)
+
+  const lerpFactor = 0.04; // Controls how fast values move — lower = smoother
+
+  if (STATE.forcedMode === 'low_oxygen') {
+    // Force oxygen to drop toward critical zone
+    STATE._targetO2 = clamp(STATE._targetO2 - rand(0.05, 0.15), 3.8, 5.2);
+    STATE._targetNH3 = clamp(STATE._targetNH3 + rand(0, 0.005), 0.02, 0.12);
+  } else if (STATE.forcedMode === 'high_ammonia') {
+    // Force ammonia spike
+    STATE._targetNH3 = clamp(STATE._targetNH3 + rand(0.01, 0.03), 0.02, 0.25);
+    STATE._targetO2 = clamp(STATE._targetO2 - rand(0, 0.05), 4.5, 8.5);
+  }
+
+  // Smooth sensor value toward target
+  STATE.oxygen     = lerp(STATE.oxygen,     STATE._targetO2,   lerpFactor);
+  STATE.ammonia    = lerp(STATE.ammonia,    STATE._targetNH3,  lerpFactor);
+  STATE.waterLevel = lerp(STATE.waterLevel, STATE._targetWL,   lerpFactor * 0.5);
+  STATE.waste      = lerp(STATE.waste,      STATE._targetWaste, lerpFactor * 0.3);
+
+  // Clamp to safe physical ranges
+  STATE.oxygen     = clamp(STATE.oxygen,     4.0, 8.5);
+  STATE.ammonia    = clamp(STATE.ammonia,    0.02, 0.22);
+  STATE.waterLevel = clamp(STATE.waterLevel, 70, 100);
+  STATE.waste      = clamp(STATE.waste,      5, 20);
+
+  // Record O2 history
+  O2_HISTORY.push(parseFloat(STATE.oxygen.toFixed(2)));
+  if (O2_HISTORY.length > 60) O2_HISTORY.shift();
+}
+
+// Drift timer — shifts sensor targets randomly every ~3s to simulate natural variation
+let driftInterval = setInterval(() => {
+  if (STATE.isPaused || STATE.forcedMode) return;
+
+  STATE._targetO2    = clamp(STATE._targetO2    + rand(-0.3, 0.3), 4.0, 8.5);
+  STATE._targetNH3   = clamp(STATE._targetNH3   + rand(-0.01, 0.015), 0.02, 0.20);
+  STATE._targetWL    = clamp(STATE._targetWL    + rand(-1.5, 1.5), 70, 100);
+  STATE._targetWaste = clamp(STATE._targetWaste + rand(-0.5, 0.8), 5, 20);
+}, 3000);
+
+// ─────────────────────────────────────────────────────────────
+// 4. AI DECISION ENGINE
+//    Rule-based intelligence that evaluates sensor data
+//    and produces status, anomaly score, and confidence
+// ─────────────────────────────────────────────────────────────
+function evaluateSystem() {
+  if (STATE.isPaused) return;
+
+  const prev = STATE.systemStatus;
+  let critFlags = 0;
+  let warnFlags = 0;
+  let scoreSum  = 0;
+
+  // ── Rule: Oxygen < 5 → CRITICAL (Hypoxia risk)
+  if (STATE.oxygen < 5.0) {
+    critFlags++;
+    scoreSum += (5.0 - STATE.oxygen) / 5.0; // Higher penalty for lower O2
+  } else if (STATE.oxygen < 6.0) {
+    warnFlags++;
+    scoreSum += 0.2;
+  }
+
+  // ── Rule: Ammonia > 0.1 → WARNING
+  if (STATE.ammonia > 0.15) {
+    critFlags++;
+    scoreSum += (STATE.ammonia - 0.1) / 0.12;
+  } else if (STATE.ammonia > 0.1) {
+    warnFlags++;
+    scoreSum += 0.25;
+  }
+
+  // ── Rule: Waste > 15 → WARNING
+  if (STATE.waste > 18) {
+    critFlags++;
+    scoreSum += (STATE.waste - 15) / 5;
+  } else if (STATE.waste > 15) {
+    warnFlags++;
+    scoreSum += 0.15;
+  }
+
+  // ── Rule: Water level < 75 → WARNING
+  if (STATE.waterLevel < 72) {
+    critFlags++;
+    scoreSum += 0.3;
+  } else if (STATE.waterLevel < 76) {
+    warnFlags++;
+    scoreSum += 0.1;
+  }
+
+  // ── Determine system status
+  if (critFlags > 0) {
+    STATE.systemStatus = 'CRITICAL';
+  } else if (warnFlags > 0) {
+    STATE.systemStatus = 'WARNING';
+  } else {
+    STATE.systemStatus = 'NORMAL';
+  }
+
+  // ── Anomaly score: normalized 0 to 1
+  STATE.anomalyScore = clamp(scoreSum, 0, 1);
+
+  // ── Confidence: inversely related to anomaly (simulates AI certainty)
+  // Adds small noise to feel realistic
+  const baseConf = 100 - (STATE.anomalyScore * 40);
+  STATE.confidenceScore = clamp(Math.round(baseConf + rand(-3, 3)), 55, 99);
+
+  // ── Fish behavior mode
+  if (STATE.oxygen < 5.0) {
+    STATE.behaviorMode = 'LOW_OXYGEN';
+    STATE.fishSpeed    = 0.35;
+    STATE.clusterFactor = 0.1;
+  } else if (STATE.ammonia > 0.1) {
+    STATE.behaviorMode = 'HIGH_AMMONIA';
+    STATE.fishSpeed    = 0.75;
+    STATE.clusterFactor = 0.8;
+  } else {
+    STATE.behaviorMode = 'NORMAL';
+    STATE.fishSpeed    = 1.0;
+    STATE.clusterFactor = 0.0;
+  }
+
+  // ── Detect status change and trigger alert
+  if (STATE.systemStatus !== prev) {
+    triggerAlert(STATE.systemStatus, prev);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 5. ALERT SYSTEM
+//    Fires when anomaly condition is detected
+// ─────────────────────────────────────────────────────────────
+function triggerAlert(newStatus, oldStatus) {
+  const alertBox = document.getElementById('alertBox');
+  const emailBox = document.getElementById('emailSimBox');
+  let   msg      = '';
+  let   emailMsg = '';
+
+  if (newStatus === 'CRITICAL') {
+    STATE.totalAlerts++;
+    let cause = '';
+    if (STATE.oxygen < 5.0)     cause = 'Low Dissolved O₂ — Hypoxia Risk';
+    else if (STATE.ammonia > 0.15) cause = 'Ammonia Level Critical';
+    else if (STATE.waste > 18)     cause = 'Waste Index Critically High';
+    else if (STATE.waterLevel < 72) cause = 'Water Level Critical';
+
+    msg = `<div class="alert-header"><div class="alert-dot"></div>CRITICAL ALERT TRIGGERED</div>
+           ⚠ ${cause}<br>
+           Immediate intervention required.<br>
+           <span style="color:var(--txt-muted);font-size:0.6rem">Time: ${logTime()}</span>`;
+    alertBox.className = 'active';
+    alertBox.innerHTML = msg;
+
+    emailMsg = `<span class="email-to">TO: aqua-ops@fishfarm.local</span><br>
+                SUBJ: [CRITICAL] ${cause}<br>
+                BODY: Automated alert at ${logTime()}. Anomaly score: ${STATE.anomalyScore.toFixed(2)}<br>
+                <span style="color:var(--bio-green)">▶ SENT ✓</span>`;
+    emailBox.className = 'sent';
+    emailBox.innerHTML = emailMsg;
+
+    addLog('critical', cause + ' — Alert triggered');
+
+  } else if (newStatus === 'WARNING') {
+    let cause = '';
+    if (STATE.ammonia > 0.1)    cause = 'Elevated Ammonia Detected';
+    else if (STATE.waste > 15)  cause = 'Waste Index Elevated';
+    else if (STATE.oxygen < 6)  cause = 'Oxygen Level Declining';
+    else if (STATE.waterLevel < 76) cause = 'Water Level Low';
+
+    msg = `<span style="color:var(--bio-amber)">⚠ WARNING: ${cause}</span><br>
+           <span style="font-size:0.65rem;color:var(--txt-muted)">Monitor closely. Confidence: ${STATE.confidenceScore}%</span>`;
+    alertBox.className = 'warn-active';
+    alertBox.innerHTML = msg;
+
+    emailMsg = `<span class="email-to">TO: aqua-ops@fishfarm.local</span><br>
+                SUBJ: [WARNING] ${cause}<br>
+                <span style="color:var(--bio-amber)">▶ QUEUED ⏳</span>`;
+    emailBox.className = '';
+    emailBox.innerHTML = emailMsg;
+
+    addLog('warning', cause);
+
+  } else if (newStatus === 'NORMAL' && oldStatus !== 'NORMAL') {
+    msg = `<span style="color:var(--bio-green)">✓</span> System recovered — All parameters normal.<br>
+           <span style="font-size:0.6rem;color:var(--txt-muted)">Resolved at ${logTime()}</span>`;
+    alertBox.className = '';
+    alertBox.innerHTML = msg;
+
+    emailMsg = `<span class="email-to">TO: aqua-ops@fishfarm.local</span><br>
+                SUBJ: [RESOLVED] System back to normal<br>
+                <span style="color:var(--bio-green)">▶ SENT ✓</span>`;
+    emailBox.className = 'sent';
+    emailBox.innerHTML = emailMsg;
+
+    addLog('normal', 'System status recovered to NORMAL');
+  }
+
+  document.getElementById('alertCount').textContent = `ALERTS: ${STATE.totalAlerts}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// 6. EVENT LOGGING SYSTEM
+//    Maintains last 10 events with timestamp, type, message
+// ─────────────────────────────────────────────────────────────
+function addLog(type, message) {
+  // Prepend new entry
+  EVENT_LOG.unshift({ time: logTime(), type, message });
+  if (EVENT_LOG.length > 10) EVENT_LOG.pop();  // Keep only last 10
+
+  // Render log list
+  const ul = document.getElementById('eventLog');
+  ul.innerHTML = '';
+  EVENT_LOG.forEach(entry => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="log-time">${entry.time}</span>
+                    <span class="log-msg ${entry.type}">${entry.message}</span>`;
+    ul.appendChild(li);
+  });
+
+  document.getElementById('logCount').textContent = `${EVENT_LOG.length} entries`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// 7. UI UPDATE ENGINE
+//    Updates all DOM elements with current sensor/AI values
+// ─────────────────────────────────────────────────────────────
+function updateUI() {
+  if (STATE.isPaused) return;
+
+  // ── Sensor values
+  document.getElementById('oxygen').textContent     = STATE.oxygen.toFixed(2);
+  document.getElementById('ammonia').textContent    = STATE.ammonia.toFixed(3);
+  document.getElementById('waterLevel').textContent = Math.round(STATE.waterLevel);
+  document.getElementById('waste').textContent      = Math.round(STATE.waste);
+
+  // ── Gauge fills
+  const o2Pct    = ((STATE.oxygen - 4.0) / 4.5) * 100;
+  const nh3Pct   = ((STATE.ammonia - 0.02) / 0.20) * 100;
+  const wlPct    = STATE.waterLevel;
+  const wastePct = (STATE.waste / 20) * 100;
+
+  setGauge('oxygen',     o2Pct,    STATE.oxygen < 5 ? 'var(--bio-red)' : STATE.oxygen < 6 ? 'var(--bio-amber)' : 'var(--bio-cyan)');
+  setGauge('ammonia',    nh3Pct,   STATE.ammonia > 0.1 ? 'var(--bio-red)' : STATE.ammonia > 0.07 ? 'var(--bio-amber)' : 'var(--bio-green)');
+  setGauge('water',      wlPct,    STATE.waterLevel < 75 ? 'var(--bio-amber)' : 'var(--bio-blue)');
+  setGauge('waste',      wastePct, STATE.waste > 15 ? 'var(--bio-red)' : STATE.waste > 12 ? 'var(--bio-amber)' : 'var(--bio-green)');
+
+  // ── Sensor badges
+  setBadge('oxygen',  STATE.oxygen < 5 ? 'CRITICAL' : STATE.oxygen < 6 ? 'LOW' : 'OPTIMAL', STATE.oxygen < 5);
+  setBadge('ammonia', STATE.ammonia > 0.1 ? 'DANGER' : STATE.ammonia > 0.07 ? 'ELEVATED' : 'SAFE', STATE.ammonia > 0.1);
+  setBadge('water',   STATE.waterLevel < 75 ? 'LOW' : 'STABLE', STATE.waterLevel < 75);
+  setBadge('waste',   STATE.waste > 15 ? 'HIGH' : STATE.waste > 12 ? 'MODERATE' : 'LOW', STATE.waste > 15);
+
+  // ── Sensor card highlight
+  setCardAlert('card-oxygen',  STATE.oxygen < 5,          STATE.oxygen < 6 && STATE.oxygen >= 5);
+  setCardAlert('card-ammonia', STATE.ammonia > 0.1,       STATE.ammonia > 0.07);
+  setCardAlert('card-water',   STATE.waterLevel < 72,     STATE.waterLevel < 76);
+  setCardAlert('card-waste',   STATE.waste > 18,          STATE.waste > 15);
+
+  // ── Status card
+  const sc = document.getElementById('statusCard');
+  const st = document.getElementById('statusText');
+  sc.className = 'status-card ' + STATE.systemStatus.toLowerCase();
+  if (STATE.systemStatus === 'CRITICAL') {
+    st.textContent = 'CRITICAL'; st.style.color = 'var(--state-critical)';
+  } else if (STATE.systemStatus === 'WARNING') {
+    st.textContent = 'WARNING'; st.style.color = 'var(--state-warning)';
+  } else {
+    st.textContent = 'NORMAL'; st.style.color = 'var(--state-normal)';
+  }
+
+  document.getElementById('anomalyScore').textContent    = STATE.anomalyScore.toFixed(2);
+  document.getElementById('confidenceScore').textContent = STATE.confidenceScore + '%';
+
+  // ── Fish behavior tag
+  const bhTag = document.getElementById('fishBehaviorTag');
+  const bhLabels = { NORMAL: 'BEHAVIOR: NORMAL', LOW_OXYGEN: 'BEHAVIOR: SEEKING SURFACE ↑', HIGH_AMMONIA: 'BEHAVIOR: CLUSTERING' };
+  bhTag.textContent = bhLabels[STATE.behaviorMode] || 'BEHAVIOR: NORMAL';
+  bhTag.style.color = STATE.behaviorMode === 'NORMAL' ? 'var(--bio-cyan)' : STATE.behaviorMode === 'LOW_OXYGEN' ? 'var(--bio-red)' : 'var(--bio-amber)';
+
+  // ── Processing indicator (cycling text simulates AI activity)
+  const labels = ['AI PROCESSING...', 'ANALYZING DATA...', 'RUNNING INFERENCE', 'EVALUATING RULES', 'SCANNING ANOMALY'];
+  document.getElementById('processingIndicator').textContent = labels[Math.floor(Date.now() / 1200) % labels.length];
+
+  // ── Clock
+  document.getElementById('clockDisplay').textContent = timeStr();
+
+  // ── Uptime
+  const upSec  = Math.floor((Date.now() - STATE.startTime) / 1000);
+  const upMins = String(Math.floor(upSec / 60)).padStart(2, '0');
+  const upSecs = String(upSec % 60).padStart(2, '0');
+  document.getElementById('uptimeDisplay').textContent = `${upMins}:${upSecs}`;
+
+  // ── Draw history chart
+  drawHistoryChart();
+}
+
+// Helper: set gauge fill width and color
+function setGauge(id, pct, color) {
+  const el = document.getElementById('gauge-' + id);
+  if (!el) return;
+  el.style.width = clamp(pct, 0, 100) + '%';
+  el.style.background = color;
+}
+
+// Helper: set sensor badge text and style
+function setBadge(id, text, isBad) {
+  const el = document.getElementById('badge-' + id);
+  if (!el) return;
+  el.textContent = text;
+  if (isBad) {
+    el.style.background = 'rgba(255,51,85,0.12)';
+    el.style.color       = 'var(--bio-red)';
+    el.style.borderColor = 'rgba(255,51,85,0.35)';
+  } else {
+    el.style.background = 'rgba(0,232,122,0.1)';
+    el.style.color       = 'var(--bio-green)';
+    el.style.borderColor = 'rgba(0,232,122,0.25)';
+  }
+}
+
+// Helper: toggle alert/warn class on sensor card
+function setCardAlert(id, isCrit, isWarn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('alert', 'warn');
+  if (isCrit) el.classList.add('alert');
+  else if (isWarn) el.classList.add('warn');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 8. HISTORY CHART — O2 sparkline using Canvas
+// ─────────────────────────────────────────────────────────────
+function drawHistoryChart() {
+  const canvas = document.getElementById('historyChart');
+  if (!canvas) return;
+  const W = canvas.parentElement.offsetWidth - 36;
+  const H = 96;
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const data   = O2_HISTORY;
+  const minVal = 3.5, maxVal = 9.0;
+  const pad    = 6;
+  const stepX  = (W - pad * 2) / (data.length - 1);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0,180,204,0.06)';
+  ctx.lineWidth   = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad + (i / 4) * (H - pad * 2);
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke();
+  }
+
+  // Critical threshold line at O2 = 5.0
+  const critY = H - pad - ((5.0 - minVal) / (maxVal - minVal)) * (H - pad * 2);
+  ctx.strokeStyle = 'rgba(255,51,85,0.35)';
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad, critY); ctx.lineTo(W - pad, critY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Gradient fill under curve
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(0,212,232,0.2)');
+  grad.addColorStop(0.7, 'rgba(0,212,232,0.04)');
+  grad.addColorStop(1, 'rgba(0,212,232,0)');
+
+  // Area
+  ctx.beginPath();
+  data.forEach((v, i) => {
+    const x = pad + i * stepX;
+    const y = H - pad - ((v - minVal) / (maxVal - minVal)) * (H - pad * 2);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad + (data.length - 1) * stepX, H - pad);
+  ctx.lineTo(pad, H - pad);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.strokeStyle = 'rgba(0,212,232,0.9)';
+  ctx.lineWidth   = 1.8;
+  ctx.lineJoin    = 'round';
+  ctx.beginPath();
+  data.forEach((v, i) => {
+    const x = pad + i * stepX;
+    const y = H - pad - ((v - minVal) / (maxVal - minVal)) * (H - pad * 2);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Current value dot with halo
+  const lastX = pad + (data.length - 1) * stepX;
+  const lastY = H - pad - ((data[data.length - 1] - minVal) / (maxVal - minVal)) * (H - pad * 2);
+  ctx.fillStyle = STATE.oxygen < 5 ? 'rgba(255,51,85,0.25)' : 'rgba(0,212,232,0.2)';
+  ctx.beginPath(); ctx.arc(lastX, lastY, 8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = STATE.oxygen < 5 ? '#ff3355' : '#00d4e8';
+  ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, Math.PI * 2); ctx.fill();
+}
+
+// ─────────────────────────────────────────────────────────────
+// 9. FISH ANIMATION ENGINE
+//    Canvas-based fish that react to sensor state
+// ─────────────────────────────────────────────────────────────
+const canvas  = document.getElementById('aquariumCanvas');
+const ctx     = canvas.getContext('2d');
+
+// Fish data
+const FISH_COUNT = 12;
+const fish = Array.from({ length: FISH_COUNT }, (_, i) => ({
+  x:    rand(80,  780),
+  y:    rand(80,  300),
+  vx:   rand(-1.2, 1.2) || 0.5,
+  vy:   rand(-0.5, 0.5),
+  size: rand(14,  22),
+  hue:  rand(180, 220),
+  tail: 0,      // tail animation phase
+  wobble: rand(0, Math.PI * 2),
+}));
+
+// Bubble system
+const BUBBLES = Array.from({ length: 18 }, () => ({
+  x:    rand(20, 840),
+  y:    rand(0, 380),
+  r:    rand(2, 6),
+  speed: rand(0.4, 1.2),
+  alpha: rand(0.1, 0.4),
+}));
+
+// Particle system (stress particles)
+let particles = [];
+
+function spawnParticle(x, y, color) {
+  if (particles.length > 40) return;
+  particles.push({ x, y, vx: rand(-1.5, 1.5), vy: rand(-1.5, 0.5), alpha: 0.8, color, r: rand(2, 5) });
+}
+
+let lastFrameTime = Date.now();
+let frameCount = 0;
+let fps = 0;
+
+function animateFish() {
+  const now = Date.now();
+  frameCount++;
+  if (now - lastFrameTime >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastFrameTime = now;
+    document.getElementById('frameCounter').textContent = `FPS: ${fps}`;
+  }
+
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // ── Background gradient
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#020a12');
+  bg.addColorStop(1, '#041a2e');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Water shimmer lines
+  ctx.strokeStyle = 'rgba(0,180,255,0.06)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 6; i++) {
+    const yLine = 40 + i * 60 + Math.sin(now / 2000 + i) * 8;
+    ctx.beginPath(); ctx.moveTo(0, yLine); ctx.lineTo(W, yLine); ctx.stroke();
+  }
+
+  // ── Sandy floor
+  const floor = ctx.createLinearGradient(0, H - 40, 0, H);
+  floor.addColorStop(0, 'rgba(120,90,40,0.3)');
+  floor.addColorStop(1, 'rgba(100,70,20,0.5)');
+  ctx.fillStyle = floor;
+  ctx.beginPath(); ctx.ellipse(W / 2, H - 5, W * 0.55, 38, 0, 0, Math.PI); ctx.fill();
+
+  // ── Seaweed
+  drawSeaweed(ctx, 60, H - 30, now);
+  drawSeaweed(ctx, 200, H - 30, now + 400);
+  drawSeaweed(ctx, 680, H - 30, now + 800);
+  drawSeaweed(ctx, 800, H - 30, now + 200);
+
+  // ── Bubbles
+  BUBBLES.forEach(b => {
+    b.y -= b.speed * 0.5;
+    b.x += Math.sin(now / 1500 + b.y * 0.05) * 0.3;
+    if (b.y < -10) { b.y = H + 5; b.x = rand(20, W - 20); }
+    ctx.strokeStyle = `rgba(180,230,255,${b.alpha})`;
+    ctx.lineWidth   = 0.8;
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
+  });
+
+  // ── Fish behavior mode
+  const mode  = STATE.behaviorMode;
+  const speed = STATE.fishSpeed;
+  const cf    = STATE.clusterFactor;
+
+  fish.forEach((f, idx) => {
+    f.wobble += 0.06;
+    f.tail   += 0.18;
+
+    // ── Behavior: LOW_OXYGEN — drift upward slowly
+    if (mode === 'LOW_OXYGEN') {
+      f.vy -= 0.012;  // float up
+      f.vx *= 0.97;
+      if (Math.random() < 0.01) spawnParticle(f.x, f.y, 'rgba(255,80,80,0.7)');
+    }
+
+    // ── Behavior: HIGH_AMMONIA — clustering toward center
+    if (mode === 'HIGH_AMMONIA') {
+      const cx = W / 2, cy = H / 2;
+      f.vx += (cx - f.x) * 0.0008 * cf;
+      f.vy += (cy - f.y) * 0.0008 * cf;
+      if (Math.random() < 0.008) spawnParticle(f.x, f.y, 'rgba(255,200,50,0.7)');
+    }
+
+    // ── Normal: smooth random wander
+    f.vx += rand(-0.06, 0.06);
+    f.vy += rand(-0.04, 0.04);
+
+    // ── Speed cap
+    const maxSpd = 1.8 * speed;
+    const spd    = Math.hypot(f.vx, f.vy);
+    if (spd > maxSpd) { f.vx = (f.vx / spd) * maxSpd; f.vy = (f.vy / spd) * maxSpd; }
+
+    // ── Move
+    f.x += f.vx;
+    f.y += f.vy;
+
+    // ── Bounce off walls
+    const wallPad = 30;
+    if (f.x < wallPad)     { f.vx += 0.3; }
+    if (f.x > W - wallPad) { f.vx -= 0.3; }
+    if (f.y < wallPad)     { f.vy += 0.2; }
+    if (f.y > H - 55)      { f.vy -= 0.2; }
+
+    // ── LOW_OXYGEN: cap Y so fish stay near top
+    if (mode === 'LOW_OXYGEN' && f.y < 40) f.vy = Math.abs(f.vy) * 0.3;
+
+    // ── Draw fish
+    const angle = Math.atan2(f.vy, f.vx);
+    const saturation = mode === 'HIGH_AMMONIA' ? '80%' : '70%';
+    const lightness  = mode === 'LOW_OXYGEN'   ? '35%' : '55%';
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    ctx.rotate(angle);
+    drawFish(ctx, f.size, f.hue, saturation, lightness, f.tail);
+    ctx.restore();
+  });
+
+  // ── Particles
+  particles = particles.filter(p => p.alpha > 0.05);
+  particles.forEach(p => {
+    p.x     += p.vx;
+    p.y     += p.vy;
+    p.alpha -= 0.018;
+    p.vy    -= 0.02;
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle   = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // ── Overlay: LOW_OXYGEN warning tint
+  if (mode === 'LOW_OXYGEN') {
+    ctx.fillStyle = 'rgba(255,40,40,0.04)';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  requestAnimationFrame(animateFish);
+}
+
+// Draw a single fish
+function drawFish(ctx, size, hue, sat, light, tail) {
+  const tailSwing = Math.sin(tail) * 0.5;
+  // Body
+  ctx.fillStyle = `hsl(${hue},${sat},${light})`;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, size, size * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Highlight
+  ctx.fillStyle = `hsla(${hue},80%,80%,0.3)`;
+  ctx.beginPath();
+  ctx.ellipse(-size * 0.15, -size * 0.12, size * 0.45, size * 0.18, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Tail
+  ctx.fillStyle = `hsl(${hue},${sat},${parseInt(light) - 10}%)`;
+  ctx.beginPath();
+  ctx.moveTo(-size * 0.7, 0);
+  ctx.lineTo(-size * 1.3, -size * 0.55 + tailSwing * size);
+  ctx.lineTo(-size * 1.3, +size * 0.55 + tailSwing * size);
+  ctx.closePath();
+  ctx.fill();
+  // Eye
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(size * 0.45, -size * 0.12, size * 0.1, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(size * 0.48, -size * 0.12, size * 0.055, 0, Math.PI * 2); ctx.fill();
+}
+
+// Draw seaweed
+function drawSeaweed(ctx, x, baseY, now) {
+  const segs = 7;
+  ctx.strokeStyle = 'rgba(30,160,90,0.55)';
+  ctx.lineWidth   = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, baseY);
+  for (let i = 1; i <= segs; i++) {
+    const swayX = x + Math.sin(now / 1200 + i * 0.8) * (i * 3);
+    const swayY = baseY - i * 14;
+    ctx.lineTo(swayX, swayY);
+  }
+  ctx.stroke();
+}
+
+// ─────────────────────────────────────────────────────────────
+// 10. CONTROL PANEL ACTIONS
+// ─────────────────────────────────────────────────────────────
+
+/** Force oxygen drop scenario */
+function forceAnomaly(type) {
+  STATE.forcedMode = type;
+  if (type === 'low_oxygen') {
+    STATE._targetO2  = 4.5;
+    addLog('info', 'Manual simulation: O₂ drop triggered');
+  } else if (type === 'high_ammonia') {
+    STATE._targetNH3 = 0.18;
+    addLog('info', 'Manual simulation: NH₃ spike triggered');
+  }
+  // Auto-clear forced mode after 15 seconds
+  setTimeout(() => {
+    STATE.forcedMode = null;
+    addLog('info', 'Forced scenario ended — returning to auto-drift');
+  }, 15000);
+}
+
+/** Restore all targets to safe values */
+function resetToNormal() {
+  STATE.forcedMode   = null;
+  STATE._targetO2    = 7.2;
+  STATE._targetNH3   = 0.04;
+  STATE._targetWL    = 88;
+  STATE._targetWaste = 7;
+  addLog('normal', 'System manually reset to normal parameters');
+}
+
+/** Toggle simulation pause */
+let _paused = false;
+function togglePause() {
+  _paused = !_paused;
+  STATE.isPaused = _paused;
+  document.getElementById('processingIndicator').textContent = _paused ? '⏸  PAUSED' : 'AI PROCESSING...';
+  addLog('info', _paused ? 'Simulation paused' : 'Simulation resumed');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 11. REAL-TIME PROCESSING LOOP
+//     Runs every 1 second — heart of the simulation
+// ─────────────────────────────────────────────────────────────
+setInterval(() => {
+  generateSensorData();  // Step 1: Generate new sensor readings
+  evaluateSystem();      // Step 2: AI engine evaluates data
+  updateUI();            // Step 3: Push all values to UI
+}, 1000);
+
+// ─────────────────────────────────────────────────────────────
+// 12. STARTUP
+// ─────────────────────────────────────────────────────────────
+addLog('info', 'AquaAI system initialized — monitoring active');
+addLog('normal', 'All sensors online — baseline established');
+
+// Start fish animation loop
+animateFish();
+
+// Initial UI paint
+updateUI();
+
+</script>
+</body>
+</html>
